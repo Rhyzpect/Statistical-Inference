@@ -1,8 +1,7 @@
 ---
 title: "EFFECT OF DOSAGE AND DELIVERY METHOD ON TOOTH GROWTH OF GUINEA PIGS"
 author: "Rhyz C. Gomez"
-output:
-  pdf_document
+output: pdf_document
 ---
 
 ## OVERVIEW

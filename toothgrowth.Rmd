@@ -2,9 +2,7 @@
 title: "EFFECT OF DOSAGE AND DELIVERY METHOD ON TOOTH GROWTH OF GUINEA PIGS"
 author: "Rhyz C. Gomez"
 output:
-  html_document:
-    keep_md: yes
-  word_document: default
+  pdf_document
 ---
 
 ## OVERVIEW
@@ -12,9 +10,9 @@ output:
 This study explores the effects of different dosages and delivery methods on the tooth growth of guinea pigs. The results of the study show that there is significant differences in the effect of different dosages, with the 2 mg dosage performs best. Furthermore, the effect is better by giving the Vitamin C as an orange juice. 
 
 ## EXPLORATORY DATA ANALYSIS
-The data that is used in this analysis is from the ToothGrowth data in the R datasets package. The data consists of 60 observations and 3 variables: the len, supp, and dose. The len column describes the length of growth of teeth of guinea pigs at different dosage and delivery methods.  The dose column is a factor variable with 3 dose levels of Vitamin C (0.5,1 and 2 mg). The supp column is the delivery methods.  It is either orange juice (OJ) or Vitamin C (VC).
+The data that is used in this analysis comes from the ToothGrowth data in the R datasets package. The data consists of 60 observations and 3 variables: the len, supp, and dose. The len column describes the length of growth of teeth of guinea pigs at different dosage and delivery methods.  The dose column is a factor variable with 3 dose levels of Vitamin C (0.5,1 and 2 mg). The supp column is the delivery methods.  It is either orange juice (OJ) or Vitamin C (VC).
 
-```{r loadingdata}
+```{r loadingdata, results='hide'}
 library(knitr)
 data("ToothGrowth")
 # The dose column should be a factor
@@ -24,15 +22,15 @@ summary(ToothGrowth)
 
 Using the summary() function, we can say that there is no missing value in the data, with the minimum value of length of teeth growth to be 4.2 and maximum value of 33.9. We can also assume that the length of tooth growth is normally distributed (see Appendix B, figure 1).  
 
-```{r,ref.label="plot1",fig.align='center',fig.height= 12,fig.width=17,echo=FALSE}
+```{r,ref.label="plot1",fig.height= 6,fig.width=11,echo=FALSE}
 
 ```
-**Figure A: Effect on Tooth Growth Per Dosage**
+**Figure A: Effect on Tooth Growth Per Dosage and By Delivery Methods**
 
 ```{r,ref.label="plot2",echo=FALSE}
 
 ```
-**Figure B: Effect on Tooth Growth By Delivery Methods**
+**Figure B: Effect on Tooth Growth By Delivery Methods and Dosages**
 
 By exploring the data (see Appendix A, Code 1 & 2), Figures A and B show that there is a direct effect on the length of teeth growth of the guinea pigs when the dosage is increase. Further, it seems the delivery method using orange juice is more promising than that of the Vitamin C delivery method.   
 
@@ -44,11 +42,14 @@ Based on Figure A and B, the level of dosage and the delivery method show effect
 In Figure A, the Orange Juice (OJ) shows more promising result. By doing hypothesis testing using t.test() function in R, we test whether there is really a difference in the delivery methods. We use paired=FALSE and var.equal=TRUE. The reason for using var.equal=TRUE is that we assume that the variances are equal. However, for further analysis we use bartlett.test() function to test the homogeneity of variances we get a p-value of 0.2331(see Appendix A, Code 3). Hence we can conclude that there is no significant evidence that shows the variances are not equal.  
 
 ```{r suptest}
-supptest <- with(ToothGrowth,t.test(len[supp=="OJ"],len[supp=="VC"],paired=FALSE, var.equal = TRUE, alternative="greater"))
+supptest <- with(ToothGrowth,t.test(len[supp=="OJ"],len[supp=="VC"],
+paired=FALSE, var.equal = TRUE, alternative="greater"))
+```
+
+```{r,echo=FALSE}
 suppT <- supptest$statistic
 suppP <- supptest$p.value
 ```
-
 The resulting test shows that the t statistic is `r suppT`, higher than 1.65. The p-value,i.e.`r suppP`, is bigger than 0.05 with the confidence interval at [0.471,inf]. Hence, we can conclude that there is significant evidence that shows the Orange Juice have better effect than the Vitamin C method.  
 
 ### EFFECT OF DOSAGE (VITAMIN C)
@@ -84,73 +85,60 @@ By assuming the length of growth of guinea's pigs teeth in the data to be normal
 \newpage
 
 ### APPENDIX A
-
-#### Code 1
+**Code 1**
 ```{r plot1,fig.height=10,fig.width=15,fig.align='center',eval=FALSE,results=FALSE}
 par(mfrow=c(2,1))
-plot(ToothGrowth$dose,ToothGrowth$len,main="Length of Teeth Growth Per Dosage Level",xlab="Dosage(mg)",ylab="Length of Growth",font.lab=2,col=c("limegreen","thistle","wheat2"))
-plot(ToothGrowth$supp,ToothGrowth$len,main="Length of Teeth Growth Per Delivery Method",xlab="Delivery Method(Orange Juice and Vitamin C)",font.lab=2,col=c("limegreen","thistle"),ylab="Length of Growth")
+plot(ToothGrowth$dose,ToothGrowth$len,main="Length of Teeth Growth Per Dosage Level",
+xlab="Dosage(mg)",ylab="Length of Growth", font.lab=2, col=c("limegreen","thistle","wheat2"))
+plot(ToothGrowth$supp,ToothGrowth$len,main="Length of Teeth Growth Per Delivery Method", 
+xlab="Delivery Method(Orange Juice and Vitamin C)", font.lab=2, col=c("limegreen","thistle"),
+ylab="Length of Growth")
 ```
-
-#### Code 2
+**Code 2**
 ```{r plot2, fig.align='center',fig.height=5,fig.width=4,eval=FALSE,results=FALSE}
 library(lattice)
-xyplot(len~dose|supp,data=ToothGrowth,main="Length Vs Dosage Per Delivery Method",ylab="Length of Teeth Growth",xlab="Dosage (mg)")
+xyplot(len~dose|supp,data=ToothGrowth, main="Length Vs Dosage Per Delivery Method",
+ylab="Length of Teeth Growth", xlab="Dosage (mg)")
 ```
-
-#### Code 3
+**Code 3**
 ```{r bartlett}
-with(ToothGrowth,bartlett.test(len~supp))
+bart <- with(ToothGrowth,bartlett.test(len~supp))
+bart$p.value
 ```
-
-#### Code 4
+**Code 4**
 ```{r dosage}
 VCtoothgrowth <- ToothGrowth[ToothGrowth$supp=="VC",]
 OJtoothgrowth <- ToothGrowth[ToothGrowth$supp=="OJ",]
 ```
-
-#### Code 5
+**Code 5**
 ```{r doseVC1}
-with(VCtoothgrowth,t.test(len[dose==0.5],len[dose==1],var.equal = TRUE,paired = FALSE))
+with(VCtoothgrowth,t.test(len[dose==0.5],len[dose==1],var.equal = TRUE, paired = FALSE))
 ```
-
-#### Code 6
+**Code 6**
 ```{r doseVC2}
-with(VCtoothgrowth,t.test(len[dose==1],len[dose==2],var.equal = TRUE,paired = FALSE))
+with(VCtoothgrowth,t.test(len[dose==1],len[dose==2],var.equal = TRUE, paired = FALSE))
 ```
-
-#### Code 7
+**Code 7**
 ```{r doseVC3}
-with(VCtoothgrowth,t.test(len[dose==0.5],len[dose==2],var.equal = TRUE,paired = FALSE))
+with(VCtoothgrowth,t.test(len[dose==0.5],len[dose==2],var.equal = TRUE, paired = FALSE))
 ```
-
-#### Code 8
+**Code 8**
 ```{r doseOJ1}
-with(OJtoothgrowth,t.test(len[dose==0.5],len[dose==1],var.equal = TRUE,paired = FALSE))
+with(OJtoothgrowth,t.test(len[dose==0.5],len[dose==1],var.equal = TRUE, paired = FALSE))
 ```
-
-#### Code 9
+**Code 9**
 ```{r doseOJ2}
- with(OJtoothgrowth,t.test(len[dose==1],len[dose==2],var.equal = TRUE,paired = FALSE))
+ with(OJtoothgrowth,t.test(len[dose==1],len[dose==2],var.equal = TRUE, paired = FALSE))
 ```
-
-#### Code 10
+**Code 10**
 ```{r doseOJ3}
-with(OJtoothgrowth,t.test(len[dose==0.5],len[dose==2],var.equal = TRUE,paired = FALSE))
+with(OJtoothgrowth,t.test(len[dose==0.5],len[dose==2],var.equal = TRUE, paired = FALSE))
 ```
-
 
 ### APPENDIX B
-
-#### Figure 1
-```{r normality,fig.align='center',fig.height=5,fig.width=7}
+**Figure 1**
+```{r normality,fig.height=3,fig.width=5}
 qqnorm(ToothGrowth$len)
 qqline(ToothGrowth$len)
-
 ```
 
-
-#### Figure B.2
-```{r variance1}
-with(ToothGrowth,bartlett.test(len~supp))
-```
